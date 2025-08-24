@@ -1,14 +1,10 @@
 import os
-from dotenv import load_dotenv
 from google.adk.agents import LlmAgent
 from google.adk.tools.mcp_tool.mcp_toolset import (
     MCPToolset,
     StdioConnectionParams,
     StdioServerParameters,
 )
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Get configuration from environment variables
 agent_name = os.getenv("AGENT_NAME", "wcgw_agent")
