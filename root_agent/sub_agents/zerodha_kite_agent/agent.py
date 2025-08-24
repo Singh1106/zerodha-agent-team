@@ -7,8 +7,8 @@ from google.adk.tools.mcp_tool.mcp_toolset import (
 )
 
 # Get configuration from environment variables
-agent_name = os.getenv("AGENT_NAME", "zerodha_kite_agent")
-model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro")
+agent_name = "zerodha_kite_agent"
+model_name = "gemini-2.5-pro"
 
 def get_kite_toolset() -> MCPToolset:
     """Get Kite MCP toolset configuration"""

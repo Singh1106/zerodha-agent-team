@@ -7,8 +7,8 @@ from google.adk.tools.mcp_tool.mcp_toolset import (
 )
 
 # Get configuration from environment variables
-agent_name = os.getenv("AGENT_NAME", "wcgw_agent")
-model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro")
+agent_name = "wcgw_agent"
+model_name = "gemini-2.5-pro"
 
 def get_wcgw_toolset() -> MCPToolset:
     """Get WCGW MCP toolset configuration"""

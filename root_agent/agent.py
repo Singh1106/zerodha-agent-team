@@ -8,8 +8,8 @@ from root_agent.sub_agents.wcgw_agent.agent import wcgw_agent
 load_dotenv()
 
 # Get configuration from environment variables
-agent_name = os.getenv("AGENT_NAME", "root_agent")
-model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro")
+agent_name = "root_agent"
+model_name = "gemini-2.5-pro"
 
 # Build dynamic instruction
 instruction = f"""You are a root agent that orchestrates tasks between sub-agents.
