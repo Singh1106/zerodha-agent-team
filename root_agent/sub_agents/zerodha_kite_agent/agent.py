@@ -1,19 +1,18 @@
 import os
+import sys
 import logging
 from pathlib import Path
 from dotenv import load_dotenv
-from google.adk.agents import LlmAgent
+from google.adk.agents import Agent
 from google.adk.tools.mcp_tool.mcp_toolset import (
     MCPToolset,
     StdioConnectionParams,
     StdioServerParameters,
 )
 
-from root_agent.sub_agents.zerodha_kite_agent.agent import zerodha_kite_agent
-
 # Configure logging
 script_dir = Path(__file__).parent
-log_file_path = script_dir / 'root_agent.log'
+log_file_path = script_dir / 'zerodha_kite_agent.log'
 
 # Create a logger
 logger = logging.getLogger(__name__)
@@ -37,51 +36,53 @@ load_dotenv()
 logger.info("Loaded environment variables.")
 
 # Get configuration from environment variables
-agent_name = os.getenv("AGENT_NAME", "root_agent")
+agent_name = os.getenv("AGENT_NAME", "zerodha_kite_agent")
 logger.info(f"Agent Name: {agent_name}")
 model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro")
 logger.info(f"Model Name: {model_name}")
 
-def get_wcgw_toolset() -> MCPToolset:
-    """Get WCGW MCP toolset configuration"""
-    logger.info("Getting WCGW toolset")
+def get_kite_toolset() -> MCPToolset:
+    """Get Kite MCP toolset configuration"""
+    logger.info("Getting Kite toolset")
 
     toolset = MCPToolset(
         connection_params=StdioConnectionParams(
             server_params=StdioServerParameters(
-                command="uv",
+                command="npx",
                 args=[
-                  "tool", "run", "--python", "3.12", "wcgw@latest"
+                  "mcp-remote", "https://mcp.kite.trade/mcp"
                 ],
             ),
         ),
     )
-    logger.info("WCGW MCP toolset created successfully.")
+    logger.info("Kite MCP toolset created successfully.")
     return toolset
 
-# Add WCGW toolset
-tools = [get_wcgw_toolset()]
-logger.debug("WCGW toolset configured.")
+# Add toolsets
+tools = [get_kite_toolset()]
+logger.debug("Toolsets configured.")
 
 # Build dynamic instruction
-instruction = f"""You are a helpful agent with local command execution capabilities.
+instruction = f"""You are a helpful agent with trading capabilities.
 
 Key capabilities:
-- Execute commands locally on the system
-- Navigate and manage files on the local system
-- Install packages, configure services, and perform system administration tasks
-- Monitor system resources and processes
+- Retrieve market data, manage portfolios, and execute trades using the Kite Connect API.
 
 Always be mindful of security best practices when executing commands. Use appropriate permissions and avoid potentially destructive operations without explicit confirmation."""
 logger.debug("Instruction for agent created.")
 
-root_agent = LlmAgent(
+zerodha_kite_agent = Agent(
     name=agent_name,
     model=model_name,
-    description="Agent with local command execution via WCGW",
+    description="""Agent with trading capabilities via Kite Connect API.
+Available tools:
+- Authentication: login
+- Market Data: get_quotes, get_ltp, get_ohlc, get_historical_data, search_instruments
+- Portfolio & Account: get_profile, get_margins, get_holdings, get_positions, get_mf_holdings
+- Orders & Trading: place_order, modify_order, cancel_order, get_orders, get_trades, get_order_history, get_order_trades
+- GTT Orders: get_gtts, place_gtt_order, modify_gtt_order, delete_gtt_order""",
     instruction=instruction,
     tools=tools,
-    sub_agents=[zerodha_kite_agent]
 )
 logger.info(f"Agent '{agent_name}' created successfully.")
 
