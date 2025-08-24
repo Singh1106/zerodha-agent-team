@@ -3,13 +3,8 @@ import logging
 from pathlib import Path
 from dotenv import load_dotenv
 from google.adk.agents import LlmAgent
-from google.adk.tools.mcp_tool.mcp_toolset import (
-    MCPToolset,
-    StdioConnectionParams,
-    StdioServerParameters,
-)
-
 from root_agent.sub_agents.zerodha_kite_agent.agent import zerodha_kite_agent
+from root_agent.sub_agents.wcgw_agent.agent import wcgw_agent
 
 # Configure logging
 script_dir = Path(__file__).parent
@@ -42,46 +37,21 @@ logger.info(f"Agent Name: {agent_name}")
 model_name = os.getenv("MODEL_NAME", "gemini-2.5-pro")
 logger.info(f"Model Name: {model_name}")
 
-def get_wcgw_toolset() -> MCPToolset:
-    """Get WCGW MCP toolset configuration"""
-    logger.info("Getting WCGW toolset")
-
-    toolset = MCPToolset(
-        connection_params=StdioConnectionParams(
-            server_params=StdioServerParameters(
-                command="uv",
-                args=[
-                  "tool", "run", "--python", "3.12", "wcgw@latest"
-                ],
-            ),
-        ),
-    )
-    logger.info("WCGW MCP toolset created successfully.")
-    return toolset
-
-# Add WCGW toolset
-tools = [get_wcgw_toolset()]
-logger.debug("WCGW toolset configured.")
-
 # Build dynamic instruction
-instruction = f"""You are a helpful agent with local command execution capabilities.
+instruction = f"""You are a root agent that orchestrates tasks between sub-agents.
+You have access to the following sub-agents:
+- zerodha_kite_agent: An agent with trading capabilities.
+- wcgw_agent: An agent with local command execution capabilities.
 
-Key capabilities:
-- Execute commands locally on the system
-- Navigate and manage files on the local system
-- Install packages, configure services, and perform system administration tasks
-- Monitor system resources and processes
-
-Always be mindful of security best practices when executing commands. Use appropriate permissions and avoid potentially destructive operations without explicit confirmation."""
+Delegate tasks to the appropriate sub-agent based on the user's request."""
 logger.debug("Instruction for agent created.")
 
 root_agent = LlmAgent(
     name=agent_name,
     model=model_name,
-    description="Agent with local command execution via WCGW",
+    description="Root agent for orchestrating sub-agents",
     instruction=instruction,
-    tools=tools,
-    sub_agents=[zerodha_kite_agent]
+    sub_agents=[zerodha_kite_agent, wcgw_agent]
 )
 logger.info(f"Agent '{agent_name}' created successfully.")
 
