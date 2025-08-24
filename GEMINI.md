@@ -26,14 +26,15 @@ poetry install
 Create a `.env` file in the `root_agent` directory with the following content:
 
 ```
-AGENT_NAME=root_agent_with_wcgw
-MODEL_NAME=gemini-1.5-pro-latest
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+GOOGLE_API_KEY=<api-key-google-gemini>
+MODEL_NAME="gemini-2.5-pro"
 ```
 
 **3. Run the Agent:**
 
 ```bash
-poetry run python root_agent/agent.py
+poetry run adk web
 ```
 
 # Development Conventions
